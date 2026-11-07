@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI 选用助手</string>
+    <string name="deepseek">DeepSeek</string>
+    <string name="workbuddy">WorkBuddy</string>
+
+    <!-- Main screen -->
+    <string name="main_clock">北京时间 · %1$s %2$s · %3$s</string>
+    <string name="main_suggest_label">此刻建议使用</string>
+    <string name="rule_hit">命中规则 · %1$s</string>
+    <string name="rule_default_hit">默认闲时策略 · 无规则命中</string>
+    <string name="main_countdown_hint">%1$d 秒后自动退出应用</string>
+    <string name="main_countdown_exiting">正在退出…</string>
+    <string name="main_seconds_unit">秒</string>
+    <string name="main_exit_note">倒计时结束将自动退出应用</string>
+    <string name="main_bottom_hint">可在设置中管理规则与倒计时时长</string>
+    <string name="main_stop_button">停止计时并跳转到设置</string>
+    <string name="main_bottom_tap_hint">点击下半屏任意位置，停止计时并前往设置</string>
+    <string name="main_policy_note">高峰时段使用 WorkBuddy · 闲时使用 DeepSeek（半价）</string>
+
+    <string name="day_workday">工作日</string>
+    <string name="day_weekend">周末</string>
+    <string name="day_holiday">法定节假日</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_preview_label">此刻推荐</string>
+    <string name="settings_preview_rule">规则 · %1$s</string>
+    <string name="settings_preview_default_rule">默认闲时策略</string>
+    <string name="settings_rules_title">推荐规则</string>
+    <string name="settings_rules_desc">按从上到下的顺序匹配，第一条命中的规则生效。</string>
+    <string name="settings_add_rule">新增规则</string>
+    <string name="settings_empty_rules">暂无规则，点击下方“新增规则”创建。</string>
+    <string name="settings_countdown_title">倒计时</string>
+    <string name="settings_countdown_label">打开应用后的自动退出时间</string>
+    <string name="settings_countdown_value">%1$d 秒</string>
+    <string name="settings_holiday_title">节假日数据</string>
+    <string name="settings_holiday_coverage">内置 %1$s 年</string>
+    <string name="settings_holiday_desc">中国法定节假日与官方放假日，用于判断闲时；数据更新于 %1$s。</string>
+    <string name="settings_holiday_unknown">—</string>
+    <string name="settings_custom_holiday_title">自定义节假日</string>
+    <string name="settings_custom_holiday_desc">用于公司假期、调休或未来年份。自定义日期优先于内置节假日与星期判断；删除后恢复默认判断。</string>
+    <string name="settings_custom_holiday_count">已添加 %1$d 个自定义日期</string>
+    <string name="settings_custom_holiday_empty">暂无自定义节假日，点击右侧“添加”选择日期。</string>
+    <string name="settings_add_holiday">添加</string>
+    <string name="custom_holiday_default_name">自定义节假日</string>
+    <string name="settings_version">AI 选用助手 %1$s · 数据更新于 %2$s</string>
+    <string name="settings_reset_rules">恢复默认规则</string>
+    <string name="settings_reset_title">恢复默认规则？</string>
+    <string name="settings_reset_message">当前所有自定义规则将被默认规则覆盖。</string>
+    <string name="settings_reset_confirm">恢复</string>
+
+    <!-- Default rules -->
+    <string name="default_rule_morning">工作日高峰 · 上午</string>
+    <string name="default_rule_afternoon">工作日高峰 · 下午</string>
+    <string name="default_rule_idle">其余时间</string>
+
+    <!-- Rule list item -->
+    <string name="rule_priority">优先 %1$d</string>
+    <string name="rule_untitled">未命名规则</string>
+    <string name="rule_summary_skip_holidays">跳过节假日</string>
+    <string name="cd_move_up">上移规则</string>
+    <string name="cd_move_down">下移规则</string>
+    <string name="cd_edit_rule">编辑规则</string>
+    <string name="cd_delete_rule">删除规则</string>
+    <string name="cd_back">返回</string>
+
+    <!-- Rule editor -->
+    <string name="rule_new_title">新建规则</string>
+    <string name="rule_edit_title">编辑规则</string>
+    <string name="rule_name_label">规则名称</string>
+    <string name="rule_name_hint">例如：工作日高峰 · 上午</string>
+    <string name="rule_name_required">请填写规则名称</string>
+    <string name="rule_target_label">推荐工具</string>
+    <string name="rule_days_label">生效星期</string>
+    <string name="rule_days_required">至少选择一天</string>
+    <string name="rule_preset_weekdays">工作日</string>
+    <string name="rule_preset_weekend">周末</string>
+    <string name="rule_preset_everyday">每天</string>
+    <string name="rule_time_label">生效时段</string>
+    <string name="rule_time_separator">至</string>
+    <string name="rule_all_day">全天生效</string>
+    <string name="rule_time_hint">开始时间包含、结束时间不包含；跨天时段按当前日期判断星期。</string>
+    <string name="rule_time_equal_error">开始与结束时间不能相同；如需全天请开启“全天生效”</string>
+    <string name="rule_skip_holidays">跳过中国法定节假日</string>
+    <string name="rule_skip_holidays_desc">开启后，法定节假日不会命中本规则。</string>
+    <string name="rule_enabled">启用这条规则</string>
+    <string name="rule_save">保存规则</string>
+    <string name="rule_delete">删除规则</string>
+    <string name="rule_delete_title">删除规则？</string>
+    <string name="rule_delete_message">删除后无法恢复。</string>
+    <string name="rule_time_start_title">开始时间</string>
+    <string name="rule_time_end_title">结束时间</string>
+
+    <!-- Days -->
+    <string name="day_mon">一</string>
+    <string name="day_tue">二</string>
+    <string name="day_wed">三</string>
+    <string name="day_thu">四</string>
+    <string name="day_fri">五</string>
+    <string name="day_sat">六</string>
+    <string name="day_sun">日</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_delete">删除</string>
+    <string name="dialog_save">保存</string>
+    <string name="dialog_add">添加</string>
+    <string name="dialog_add_holiday_title">添加自定义节假日</string>
+    <string name="dialog_edit_holiday_title">修改自定义节假日</string>
+    <string name="dialog_holiday_name_hint">节日名称（可选）</string>
+    <string name="dialog_delete_holiday_title">删除自定义节假日？</string>
+    <string name="dialog_delete_holiday_message">%1$s（%2$s）将恢复为按内置节假日和星期判断。</string>
+
+    <string name="cd_settings">设置</string>
+    <string name="cd_delete_holiday">删除自定义节假日</string>
+</resources>

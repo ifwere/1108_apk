@@ -31,4 +31,10 @@
     <color name="countdown_track">#E7E8F0</color>
 
     <color name="ic_launcher_background">#4F46E5</color>
+
+    <color name="calendar_holiday_bg">#FDECEC</color>
+    <color name="calendar_holiday_text">#D92D20</color>
+    <color name="calendar_custom_bg">#EDE9FE</color>
+    <color name="calendar_makeup_text">#C2410C</color>
+    <color name="calendar_makeup_bg">#FFF1E6</color>
 </resources>

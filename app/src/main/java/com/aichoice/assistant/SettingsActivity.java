@@ -3,12 +3,16 @@ package com.aichoice.assistant;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.aichoice.assistant.data.CustomHolidayRepository;
+import com.aichoice.assistant.data.HolidayCacheRepository;
+import com.aichoice.assistant.data.HolidayDataProvider;
+import com.aichoice.assistant.data.HolidayRemoteClient;
 import com.aichoice.assistant.data.Rule;
 import com.aichoice.assistant.data.RuleRepository;
 import com.aichoice.assistant.data.Target;
@@ -30,6 +34,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Settings screen: preview of the current recommendation, full CRUD and
@@ -46,6 +52,8 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
     private RecommendationEngine engine;
     private RuleAdapter adapter;
     private boolean updatingSlider;
+    private boolean refreshingHolidays;
+    private final ExecutorService refreshExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +63,8 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
 
         repository = new RuleRepository(this);
         customHolidayRepository = new CustomHolidayRepository(this);
-        baseCalendar = HolidayCalendar.fromAssets(this);
-        calendar = baseCalendar;
+        baseCalendar = HolidayDataProvider.baseCalendar(this);
+        calendar = HolidayDataProvider.load(this);
         engine = new RecommendationEngine(calendar);
 
         binding.toolbar.setNavigationOnClickListener(view ->
@@ -77,6 +85,9 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
         binding.btnAddRule.setOnClickListener(view ->
                 startActivity(new Intent(this, RuleEditActivity.class)));
         binding.btnAddHoliday.setOnClickListener(view -> showDatePicker());
+        binding.btnRefreshHoliday.setOnClickListener(view -> refreshHolidays());
+        binding.btnOpenCalendar.setOnClickListener(view ->
+                startActivity(new Intent(this, CalendarActivity.class)));
 
         setupCountdownSlider();
         bindHolidayInfo();
@@ -94,7 +105,8 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
     }
 
     private void reloadHolidayCalendar() {
-        calendar = baseCalendar.withAdditionalHolidays(customHolidayRepository.getAll());
+        baseCalendar = HolidayDataProvider.baseCalendar(this);
+        calendar = HolidayDataProvider.load(this);
         engine = new RecommendationEngine(calendar);
     }
 
@@ -164,6 +176,14 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
         binding.tvHolidayDesc.setText(getString(R.string.settings_holiday_desc, updated));
         binding.tvVersion.setText(
                 getString(R.string.settings_version, BuildConfig.VERSION_NAME, updated));
+
+        HolidayCacheRepository cache = new HolidayCacheRepository(this);
+        if (HolidayDataProvider.remoteCalendar(this) != null) {
+            binding.tvHolidaySource.setText(getString(
+                    R.string.settings_holiday_source_network, cache.getFetchedAt()));
+        } else {
+            binding.tvHolidaySource.setText(R.string.settings_holiday_source_bundled);
+        }
     }
 
     private void renderCustomHolidays() {
@@ -262,6 +282,55 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
         reloadHolidayCalendar();
         renderCustomHolidays();
         refreshPreview();
+    }
+
+    /**
+     * Downloads the chinese-days snapshot on demand. The UI keeps working with
+     * cached or bundled data while the request runs and if it fails.
+     */
+    private void refreshHolidays() {
+        if (refreshingHolidays) {
+            return;
+        }
+        refreshingHolidays = true;
+        binding.btnRefreshHoliday.setEnabled(false);
+        binding.btnRefreshHoliday.setText(R.string.settings_refreshing);
+
+        refreshExecutor.execute(() -> {
+            boolean success = true;
+            try {
+                String raw = HolidayRemoteClient.fetch();
+                HolidayDataProvider.refreshFromNetwork(getApplicationContext(), raw);
+            } catch (Exception e) {
+                success = false;
+            }
+            final boolean finishedSuccessfully = success;
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                refreshingHolidays = false;
+                binding.btnRefreshHoliday.setEnabled(true);
+                binding.btnRefreshHoliday.setText(R.string.settings_refresh_holiday);
+                if (finishedSuccessfully) {
+                    reloadHolidayCalendar();
+                    renderCustomHolidays();
+                    refreshPreview();
+                    bindHolidayInfo();
+                    Toast.makeText(this, R.string.settings_refresh_success,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.settings_refresh_failed,
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        refreshExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     private void confirmReset() {

@@ -32,7 +32,7 @@ public class HolidayCalendarTest {
         assertEquals("2026-11-07", calendar.updated());
         assertEquals(2025, calendar.firstYear());
         assertEquals(2026, calendar.lastYear());
-        assertEquals("2025–2026", calendar.yearRange());
+        assertEquals("2025-2026", calendar.yearRange());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class HolidayCalendarTest {
         HolidayCalendar calendar = HolidayCalendar.empty();
 
         assertFalse(calendar.isHoliday(LocalDate.of(2026, 10, 1)));
-        assertEquals("—", calendar.yearRange());
+        assertEquals("-", calendar.yearRange());
         assertEquals("", calendar.updated());
     }
 
@@ -77,7 +77,7 @@ public class HolidayCalendarTest {
         assertTrue(merged.isHoliday(LocalDate.of(2027, 10, 8)));
         // Built-in entries not overridden are preserved.
         assertEquals("春节", merged.holidayName(LocalDate.of(2026, 2, 17)));
-        assertEquals("2025–2027", merged.yearRange());
+        assertEquals("2025-2027", merged.yearRange());
         // The original calendar is not mutated.
         assertEquals("国庆节", base.holidayName(LocalDate.of(2026, 10, 7)));
         assertFalse(base.isHoliday(LocalDate.of(2027, 10, 8)));

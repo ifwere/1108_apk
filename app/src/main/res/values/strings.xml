@@ -21,6 +21,7 @@
     <string name="day_workday">工作日</string>
     <string name="day_weekend">周末</string>
     <string name="day_holiday">法定节假日</string>
+    <string name="day_makeup_weekend">周末 · 调休上班</string>
 
     <!-- Settings -->
     <string name="settings_title">设置</string>
@@ -35,11 +36,18 @@
     <string name="settings_countdown_label">打开应用后的自动退出时间</string>
     <string name="settings_countdown_value">%1$d 秒</string>
     <string name="settings_holiday_title">节假日数据</string>
-    <string name="settings_holiday_coverage">内置 %1$s 年</string>
+    <string name="settings_holiday_coverage">覆盖 %1$s 年</string>
     <string name="settings_holiday_desc">中国法定节假日与官方放假日，用于判断闲时；数据更新于 %1$s。</string>
-    <string name="settings_holiday_unknown">—</string>
+    <string name="settings_holiday_unknown">-</string>
+    <string name="settings_holiday_source_network">网络数据（%1$s 刷新）</string>
+    <string name="settings_holiday_source_bundled">内置数据</string>
+    <string name="settings_refresh_holiday">刷新网络数据</string>
+    <string name="settings_refreshing">正在刷新…</string>
+    <string name="settings_refresh_success">节假日数据已更新</string>
+    <string name="settings_refresh_failed">刷新失败，继续使用本地数据</string>
+    <string name="settings_open_calendar">查看日历</string>
     <string name="settings_custom_holiday_title">自定义节假日</string>
-    <string name="settings_custom_holiday_desc">用于公司假期、调休或未来年份。自定义日期优先于内置节假日与星期判断；删除后恢复默认判断。</string>
+    <string name="settings_custom_holiday_desc">用于公司假期、调休或未来年份。自定义日期优先级最高；删除后恢复按内置或网络节假日与星期判断。</string>
     <string name="settings_custom_holiday_count">已添加 %1$d 个自定义日期</string>
     <string name="settings_custom_holiday_empty">暂无自定义节假日，点击右侧“添加”选择日期。</string>
     <string name="settings_add_holiday">添加</string>
@@ -114,4 +122,16 @@
 
     <string name="cd_settings">设置</string>
     <string name="cd_delete_holiday">删除自定义节假日</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">节假日日历</string>
+    <string name="calendar_note">补班日仅作标记；周末及法定节假日仍按空闲处理。</string>
+    <string name="calendar_legend_holiday">休</string>
+    <string name="calendar_legend_makeup">班</string>
+    <string name="calendar_legend_custom">自定义</string>
+    <string name="calendar_empty">当前没有可展示的月份。</string>
+    <string name="calendar_source_network">数据来源：网络数据（%1$s 刷新）</string>
+    <string name="calendar_source_bundled">数据来源：内置数据，可在设置中刷新网络数据</string>
+    <string name="calendar_month_title">%1$d年%2$d月</string>
+    <string name="calendar_month_summary">%1$d 天假 · %2$d 天补班</string>
 </resources>

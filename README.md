@@ -4,7 +4,7 @@
 
 - 最低支持 Android 10（API 29），目标/编译 SDK 34。
 - 面向 ARMv8（arm64-v8a）设备；应用本身是纯 Java 代码，不依赖原生库，因此在 arm64 设备上直接运行。
-- 无网络权限，所有规则和节假日数据都在本地，启动速度快、隐私友好。
+- 默认离线运行；只有在设置页手动点击“刷新网络数据”时才会联网，启动和推荐过程不发起网络请求。
 
 ## 功能
 
@@ -21,6 +21,8 @@
    - 规则启用/停用、上移/下移调整优先级；
    - 自定义倒计时时长（1–30 秒）；
    - 添加/删除自定义节假日（公司假期、调休或未来年份），无需重新安装；
+   - 手动从网络刷新节假日数据，失败时自动沿用本地数据；
+   - 查看从本月到最后一个有数据年份年底的日历；
    - 一键恢复默认规则。
 
 ### 默认判定规则
@@ -33,7 +35,8 @@
 
 - 规则按列表顺序匹配，**第一条命中的规则生效**。
 - 默认高峰规则开启「跳过中国法定节假日」；法定节假日全天按空闲处理。
-- 周末全天按空闲处理（调休上班的周末也按周末处理，与需求一致）。
+- 判定口径：北京时间周一至周五、且不是法定节假日的 09:00-12:00 与 14:00-18:00 为高峰；其余时间全部空闲。
+- 周末全天按空闲处理；调休上班的周末仍然按周末处理，只在日历和主界面上做标记，不触发高峰规则。
 - 12:00–14:00 午间以及 18:00 之后均属于空闲时段，使用 DeepSeek。
 - 空闲时段 DeepSeek 价格为高峰时段的一半，因此策略是：高峰用 WorkBuddy，把 DeepSeek 留给半价闲时。
 - 若没有任何规则命中（例如规则全部被停用），兜底使用 DeepSeek。
@@ -42,15 +45,31 @@
 
 ### 节假日数据
 
-- 内置数据位于 `app/src/main/assets/holidays.json`，当前包含 **2024–2026 年**国务院公布的放假日期，以及 **2027 年**已知的法定节日日期。
-- 只列出「休息日」；调休上班的周末无需列出，因为应用本身把周末视为空闲。
+数据来源与优先级（从高到低）：
+
+1. 用户自定义节假日：覆盖同一天的休息状态与名称。
+2. 网络缓存：设置页手动刷新 `https://cdn.jsdelivr.net/npm/chinese-days/dist/chinese-days.json` 后保存；对网络覆盖到的年份整体替换内置数据。
+3. 内置数据：`app/src/main/assets/holidays.json`，作为离线兜底，当前包含 2024-2027 年放假日和调休补班日。
+4. 星期判断：周六、周日为空闲。
+
+网络数据包含三类字段：
+
+| 字段 | 含义 | 应用行为 |
+| --- | --- | --- |
+| `holidays` | 放假日 | 按休息日处理 |
+| `workdays` | 调休补班日 | 仅日历标注“班”；即使落在周末仍按空闲处理 |
+| `inLieuDays` | 调休来源日 | 忽略（已包含在放假日中） |
+
+- 刷新是手动操作，失败时保留上次缓存或内置数据，不覆盖旧数据。
+- 数据不做自动删除；日历只展示本月及以后的月份，不展示历史月份。
+- 不写文件日志，失败信息仅通过界面 Toast 提示。
 - 数据缺失的年份不会报错，只是无法识别该年的节假日。
 
 **自定义节假日（方案 B）**：设置页的「自定义节假日」区域可以按日期添加任意休息日，并填写名称：
 
-- 自定义日期与内置数据合并，**优先于内置节假日和星期判断**；同一天以自定义名称为准。
+- 自定义日期与内置/网络数据合并，**优先级最高**；同一天以自定义名称为准。
 - 适合公司假期、临时调休，以及官方安排尚未内置的未来年份，**添加后立即生效，无需重新编译或安装 APK**。
-- 数据保存在本机 SharedPreferences（`ai_choice_custom_holidays` / `days_v1`），不上传网络；删除某条后，该日期恢复为按内置节假日和星期判断。
+- 数据保存在本机 SharedPreferences（`ai_choice_custom_holidays` / `days_v1`），不上传网络；删除某条后，该日期恢复为按内置/网络节假日和星期判断。
 - 若后续拿到了新的官方数据，仍可更新 `holidays.json` 并重新打包；两种方式互不冲突。
 
 ## 构建与运行（GitHub Actions）
@@ -90,6 +109,8 @@ APK 输出在 `app/build/outputs/apk/debug/`。
 - 输入为 UTC 时仍按北京时间判断；
 - 规则 JSON 序列化/反序列化；
 - 节假日 JSON 解析与日期分类；
+- chinese-days 网络格式解析、中文名提取、补班日识别与年份替换合并；
+- 日历月份范围（本月到最后有数据年份的 12 月）；
 - 自定义节假日的合并/覆盖、空名称兜底；
 - 自定义节假日 JSON 编解码（排序、无效数据容错）；
 - 时间、星期格式化。
@@ -99,21 +120,28 @@ APK 输出在 `app/build/outputs/apk/debug/`。
 ```
 app/src/main/java/com/aichoice/assistant/
 ├── MainActivity.java          # 上/下 1/2 主界面与倒计时
-├── SettingsActivity.java      # 规则列表、倒计时、节假日信息
+├── SettingsActivity.java      # 规则列表、倒计时、节假日信息与手动刷新
+├── CalendarActivity.java      # 本月起的节假日日历
 ├── RuleEditActivity.java      # 规则新增/编辑
 ├── data/
-│   ├── CustomHolidayCodec.java      # 自定义节假日 JSON 编解码
-│   ├── CustomHolidayRepository.java # 自定义节假日本地存储
+│   ├── CustomHolidayCodec.java       # 自定义节假日 JSON 编解码
+│   ├── CustomHolidayRepository.java  # 自定义节假日本地存储
+│   ├── HolidayCacheRepository.java   # 网络节假日快照缓存
+│   ├── HolidayDataProvider.java      # 内置/网络/自定义数据合并入口
+│   ├── HolidayRemoteClient.java      # 手动刷新时的 HTTP 请求
 │   ├── Rule.java              # 规则模型 + JSON
 │   ├── RuleRepository.java    # SharedPreferences 持久化与默认规则
 │   └── Target.java            # DeepSeek / WorkBuddy
 ├── logic/
-│   ├── HolidayCalendar.java   # 节假日数据与日期分类
+│   ├── HolidayCalendar.java   # 节假日数据、补班日与日期分类
+│   ├── CalendarMonths.java    # 日历月份范围计算
 │   ├── RecommendationEngine.java
 │   ├── Recommendation.java
 │   └── DayKind.java
 ├── ui/
 │   ├── CountdownRingView.java # 倒计时圆环动画
+│   ├── MonthCalendarAdapter.java
+│   ├── MonthCalendarView.java
 │   └── RuleAdapter.java
 └── util/TimeUtils.java
 ```

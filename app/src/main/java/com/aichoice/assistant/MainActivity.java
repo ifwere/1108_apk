@@ -10,7 +10,7 @@ import android.os.SystemClock;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.aichoice.assistant.data.CustomHolidayRepository;
+import com.aichoice.assistant.data.HolidayDataProvider;
 import com.aichoice.assistant.data.Rule;
 import com.aichoice.assistant.data.RuleRepository;
 import com.aichoice.assistant.data.Target;
@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private RuleRepository repository;
-    private CustomHolidayRepository customHolidayRepository;
-    private HolidayCalendar baseCalendar;
     private HolidayCalendar calendar;
     private RecommendationEngine engine;
 
@@ -55,9 +53,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         repository = new RuleRepository(this);
-        customHolidayRepository = new CustomHolidayRepository(this);
-        baseCalendar = HolidayCalendar.fromAssets(this);
-        calendar = baseCalendar;
+        calendar = HolidayDataProvider.load(this);
         engine = new RecommendationEngine(calendar);
 
         binding.btnSettings.setOnClickListener(view -> openSettings());
@@ -71,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         navigatingToSettings = false;
         // Reload in case the user edited rules, countdown or custom holidays.
-        calendar = baseCalendar.withAdditionalHolidays(customHolidayRepository.getAll());
+        calendar = HolidayDataProvider.load(this);
         engine = new RecommendationEngine(calendar);
         ZonedDateTime now = ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE);
         List<Rule> rules = repository.getRules();
@@ -139,7 +135,9 @@ public class MainActivity extends AppCompatActivity {
             String name = calendar.holidayName(beijingTime.toLocalDate());
             dayLabel = name == null ? getString(R.string.day_holiday) : name;
         } else if (kind == DayKind.WEEKEND) {
-            dayLabel = getString(R.string.day_weekend);
+            dayLabel = calendar.isMakeupWorkday(beijingTime.toLocalDate())
+                    ? getString(R.string.day_makeup_weekend)
+                    : getString(R.string.day_weekend);
         } else {
             dayLabel = getString(R.string.day_workday);
         }

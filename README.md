@@ -96,6 +96,10 @@
    - 上传两个 APK 到 Actions Artifacts：
      - `ai-choice-assistant-debug`
      - `ai-choice-assistant-release`
+   - 推送到 `main` 分支（或在 `main` 上手动触发）且构建成功后，自动创建 GitHub Release：
+     - tag 为 `v<versionName>-build.<run_number>`，例如 `v1.0.0-build.12`；
+     - 附带 `ai-choice-assistant-<versionName>-release.apk` 与 `-debug.apk`；
+     - 自动设为 Latest release。
 3. 下载 APK 后直接安装到 ARMv8 的 Android 10+ 设备即可。release 包暂时使用 debug 签名，便于直接安装。
 
 本地构建（可选）：

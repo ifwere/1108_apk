@@ -13,6 +13,7 @@
 1. **屏幕上半部分只展示推荐结果**（不做任何交互）：
    - 高峰时段 → **WorkBuddy**
    - 空闲时段 → **DeepSeek**
+   - 推荐卡片整块背景随结果变为蓝色或绿色，产品名称独占一行，便于一眼识别。
    - 同时显示当前北京时间、星期/节假日和命中的规则。
 2. **屏幕下半部分**展示倒计时圆环动画和剩余秒数；**点击下半屏任意位置**（不限于按钮）都会停止计时并跳转到设置。
 3. 默认倒计时 **5 秒**，倒计时结束后自动退出应用（从最近任务中移除）。
@@ -24,6 +25,17 @@
    - 手动从网络刷新节假日数据，失败时自动沿用本地数据；
    - 查看从本月到最后一个有数据年份年底的日历；
    - 一键恢复默认规则。
+
+### 主界面配色
+
+推荐卡片不再使用左侧圆形徽标，产品名称独占整行，并通过 `autoSizeTextType` 在 20sp-34sp 之间自动缩放，确保任何屏幕宽度和系统字体大小下都能完整显示。
+
+| 推荐 | 卡片背景 | 卡片文字 | 品牌色来源 |
+| --- | --- | --- | --- |
+| DeepSeek | 蓝色渐变 `#4D6BFE` -> `#3D52D8` | 白色 | DeepSeek 官方 logo 主色 `#4D6BFE` |
+| WorkBuddy | 绿色渐变 `#0EC8A9` -> `#01C886` | 深色 `#06251C` | WorkBuddy 官网 `logo.svg` 渐变 |
+
+倒计时圆环、设置页预览文字和规则列表中的产品徽标同时使用对应品牌色，避免主界面与设置页配色不一致。
 
 ### 默认判定规则
 
@@ -119,7 +131,7 @@ APK 输出在 `app/build/outputs/apk/debug/`。
 
 ```
 app/src/main/java/com/aichoice/assistant/
-├── MainActivity.java          # 上/下 1/2 主界面与倒计时
+├── MainActivity.java          # 上/下 1/2 主界面、品牌色卡片与倒计时
 ├── SettingsActivity.java      # 规则列表、倒计时、节假日信息与手动刷新
 ├── CalendarActivity.java      # 本月起的节假日日历
 ├── RuleEditActivity.java      # 规则新增/编辑
@@ -153,3 +165,4 @@ app/src/main/java/com/aichoice/assistant/
 - `abiFilters = ["arm64-v8a"]`，明确 ARMv8 目标；当前没有 native 代码，因此 APK 本身 ABI 无关，可直接在 arm64 设备上安装运行。
 - 使用 Java 17、AndroidX、Material 3、ViewBinding。
 - 时间判断统一使用 `Asia/Shanghai`（北京时间），不受设备时区影响。
+- 品牌色集中在 `app/src/main/res/values/colors.xml`；推荐卡片背景为 `bg_reco_card.xml`（DeepSeek）与 `bg_reco_card_workbuddy.xml`（WorkBuddy），由 `MainActivity.bindRecommendation` 按推荐结果切换。

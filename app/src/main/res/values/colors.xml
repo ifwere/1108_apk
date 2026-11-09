@@ -7,11 +7,17 @@
     <color name="secondary">#6366F1</color>
 
     <color name="deepseek">#4D6BFE</color>
-    <color name="workbuddy">#F97316</color>
+    <color name="workbuddy">#0A7F5D</color>
     <color name="ring_deepseek">#9DB0FF</color>
-    <color name="ring_workbuddy">#FFB27A</color>
+    <color name="ring_workbuddy">#6FE8C9</color>
     <color name="ring_light_deepseek">#4D6BFE</color>
-    <color name="ring_light_workbuddy">#F97316</color>
+    <color name="ring_light_workbuddy">#01C886</color>
+
+    <!-- Text on the brand-colored recommendation card. -->
+    <color name="on_brand">#FFFFFF</color>
+    <color name="on_brand_secondary">#E6FFFFFF</color>
+    <color name="on_workbuddy">#06251C</color>
+    <color name="on_workbuddy_secondary">#0B4A3A</color>
 
     <color name="main_bg_top">#0D1024</color>
     <color name="main_bg_mid">#171B3D</color>

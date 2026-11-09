@@ -1,7 +1,6 @@
 package com.aichoice.assistant;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -94,14 +93,20 @@ public class MainActivity extends AppCompatActivity {
         boolean deepSeek = target == Target.DEEPSEEK;
 
         binding.tvTarget.setText(target.displayName());
-        binding.tvBadge.setText(target.shortName());
 
-        int accent = ContextCompat.getColor(this,
-                deepSeek ? R.color.deepseek : R.color.workbuddy);
-        int ringColor = ContextCompat.getColor(this,
-                deepSeek ? R.color.ring_light_deepseek : R.color.ring_light_workbuddy);
-        binding.tvBadge.setBackgroundTintList(ColorStateList.valueOf(accent));
-        binding.ring.setAccentColor(ringColor);
+        // The whole card carries the product's brand color so the result can be
+        // recognised at a glance; text colors switch to stay legible.
+        binding.recoCard.setBackgroundResource(deepSeek
+                ? R.drawable.bg_reco_card
+                : R.drawable.bg_reco_card_workbuddy);
+        binding.tvTarget.setTextColor(ContextCompat.getColor(this,
+                deepSeek ? R.color.on_brand : R.color.on_workbuddy));
+        int secondaryText = ContextCompat.getColor(this,
+                deepSeek ? R.color.on_brand_secondary : R.color.on_workbuddy_secondary);
+        binding.tvSuggestLabel.setTextColor(secondaryText);
+        binding.tvRuleHit.setTextColor(secondaryText);
+        binding.ring.setAccentColor(ContextCompat.getColor(this,
+                deepSeek ? R.color.ring_light_deepseek : R.color.ring_light_workbuddy));
 
         String ruleName = recommendation.getRuleName();
         if (ruleName == null || ruleName.trim().isEmpty()) {
@@ -121,10 +126,6 @@ public class MainActivity extends AppCompatActivity {
                 .translationY(0f)
                 .setDuration(220)
                 .start();
-
-        binding.tvBadge.animate().cancel();
-        binding.tvBadge.setAlpha(0f);
-        binding.tvBadge.animate().alpha(1f).setDuration(220).start();
     }
 
     private void updateClock(ZonedDateTime now) {

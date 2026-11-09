@@ -59,62 +59,47 @@
                     tools:text="北京时间 · 11月8日 周日 10:00 · 周末" />
 
                 <LinearLayout
+                    android:id="@+id/recoCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/bg_reco_card"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:padding="18dp">
 
                     <TextView
-                        android:id="@+id/tvBadge"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="@drawable/bg_badge"
-                        android:backgroundTint="@color/deepseek"
-                        android:gravity="center"
-                        android:textColor="@color/white"
-                        android:textSize="17sp"
-                        android:textStyle="bold"
-                        tools:text="DS" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/tvSuggestLabel"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="@string/main_suggest_label"
+                        android:textColor="@color/on_brand_secondary"
+                        android:textSize="13sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/main_suggest_label"
-                            android:textColor="@color/white_55"
-                            android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvTarget"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:autoSizeMaxTextSize="34sp"
+                        android:autoSizeMinTextSize="20sp"
+                        android:autoSizeStepGranularity="1sp"
+                        android:autoSizeTextType="uniform"
+                        android:maxLines="1"
+                        android:textColor="@color/on_brand"
+                        android:textSize="34sp"
+                        android:textStyle="bold"
+                        tools:text="DeepSeek" />
 
-                        <TextView
-                            android:id="@+id/tvTarget"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:maxLines="1"
-                            android:textColor="@color/white"
-                            android:textSize="34sp"
-                            android:textStyle="bold"
-                            tools:text="DeepSeek" />
-
-                        <TextView
-                            android:id="@+id/tvRuleHit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:textColor="@color/white_55"
-                            android:textSize="13sp"
-                            tools:text="命中规则 · 其余时间" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvRuleHit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textColor="@color/on_brand_secondary"
+                        android:textSize="13sp"
+                        tools:text="命中规则 · 其余时间" />
                 </LinearLayout>
 
             </LinearLayout>

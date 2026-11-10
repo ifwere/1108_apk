@@ -9,6 +9,7 @@ import android.os.SystemClock;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.aichoice.assistant.data.HolidayAutoRefresher;
 import com.aichoice.assistant.data.HolidayDataProvider;
 import com.aichoice.assistant.data.Rule;
 import com.aichoice.assistant.data.RuleRepository;
@@ -64,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
         // The whole lower half is one large tap target: it stops the timer and
         // opens settings, exactly like the visible button.
         binding.bottomSection.setOnClickListener(view -> openSettings());
+
+        // Yearly automatic refresh window: from December 20 onwards, update the
+        // network holiday snapshot once so next year's schedule is recognized.
+        HolidayAutoRefresher.refreshIfDue(this, this::onHolidayDataRefreshed);
     }
 
     @Override
@@ -130,6 +135,22 @@ public class MainActivity extends AppCompatActivity {
                 .translationY(0f)
                 .setDuration(220)
                 .start();
+    }
+
+    /** Applies a holiday snapshot downloaded in the background. */
+    private void onHolidayDataRefreshed() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        calendar = HolidayDataProvider.load(this);
+        engine = new RecommendationEngine(calendar);
+        ZonedDateTime now = ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE);
+        List<Rule> rules = repository.getRules();
+        Recommendation recommendation = engine.evaluate(now, rules);
+        activeRules = rules;
+        activeRecommendation = recommendation;
+        bindRecommendation(recommendation, rules, now);
+        updateClock(now);
     }
 
     private void updateClock(ZonedDateTime now) {

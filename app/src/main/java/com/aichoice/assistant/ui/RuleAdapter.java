@@ -1,7 +1,6 @@
 package com.aichoice.assistant.ui;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -69,9 +68,13 @@ public class RuleAdapter extends RecyclerView.Adapter<RuleAdapter.RuleViewHolder
         boolean deepSeek = rule.getTarget() == Target.DEEPSEEK;
 
         binding.tvBadge.setText(rule.getTarget().shortName());
-        binding.tvBadge.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(context,
-                        deepSeek ? R.color.deepseek : R.color.workbuddy)));
+        // Mirror the main screen: the same brand gradient and text color as the
+        // recommendation card for each target.
+        binding.tvBadge.setBackgroundResource(deepSeek
+                ? R.drawable.bg_badge
+                : R.drawable.bg_badge_workbuddy);
+        binding.tvBadge.setTextColor(ContextCompat.getColor(context,
+                deepSeek ? R.color.white : R.color.on_workbuddy));
 
         String name = rule.getName().trim();
         binding.tvName.setText(name.isEmpty()

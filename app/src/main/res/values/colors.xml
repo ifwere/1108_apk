@@ -6,8 +6,9 @@
     <color name="on_primary_container">#1E1B4B</color>
     <color name="secondary">#6366F1</color>
 
+    <!-- Match the top color of the recommendation card gradients. -->
     <color name="deepseek">#4D6BFE</color>
-    <color name="workbuddy">#0A7F5D</color>
+    <color name="workbuddy">#0EC8A9</color>
     <color name="ring_deepseek">#9DB0FF</color>
     <color name="ring_workbuddy">#6FE8C9</color>
     <color name="ring_light_deepseek">#4D6BFE</color>

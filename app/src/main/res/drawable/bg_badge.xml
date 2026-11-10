@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="@color/deepseek" />
+    <!-- Same gradient as bg_reco_card.xml (DeepSeek). -->
+    <gradient
+        android:angle="270"
+        android:endColor="#3D52D8"
+        android:startColor="#4D6BFE" />
 </shape>

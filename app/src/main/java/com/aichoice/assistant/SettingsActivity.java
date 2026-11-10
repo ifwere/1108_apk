@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.aichoice.assistant.data.CustomHolidayRepository;
+import com.aichoice.assistant.data.HolidayAutoRefresher;
 import com.aichoice.assistant.data.HolidayCacheRepository;
 import com.aichoice.assistant.data.HolidayDataProvider;
 import com.aichoice.assistant.data.HolidayRemoteClient;
@@ -117,12 +118,27 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
 
         previewHandler.removeCallbacks(previewTick);
         previewHandler.postDelayed(previewTick, 30_000L);
+
+        // Joins the yearly automatic refresh if it is still running, or starts
+        // it when the main screen was skipped.
+        HolidayAutoRefresher.refreshIfDue(this, this::onHolidayDataRefreshed);
     }
 
     @Override
     protected void onPause() {
         previewHandler.removeCallbacks(previewTick);
         super.onPause();
+    }
+
+    /** Applies a holiday snapshot downloaded in the background. */
+    private void onHolidayDataRefreshed() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        reloadHolidayCalendar();
+        bindHolidayInfo();
+        renderCustomHolidays();
+        refreshPreview();
     }
 
     private void reloadHolidayCalendar() {

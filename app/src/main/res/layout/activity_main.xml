@@ -48,32 +48,40 @@
                 android:paddingEnd="26dp"
                 android:paddingBottom="20dp">
 
-                <TextView
-                    android:id="@+id/tvClock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:letterSpacing="0.02"
-                    android:textColor="@color/white_55"
-                    android:textSize="13sp"
-                    tools:text="北京时间 · 11月8日 周日 10:00 · 周末" />
-
                 <LinearLayout
                     android:id="@+id/recoCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
                     android:background="@drawable/bg_reco_card"
                     android:orientation="vertical"
                     android:padding="18dp">
 
-                    <TextView
-                        android:id="@+id/tvSuggestLabel"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/main_suggest_label"
-                        android:textColor="@color/on_brand_secondary"
-                        android:textSize="13sp" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvSuggestLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/main_suggest_label"
+                            android:textColor="@color/on_brand_secondary"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvClock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="@color/on_brand_secondary"
+                            android:textSize="12sp"
+                            tools:text="11月8日 周日 10:00 · 周末" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvTarget"
@@ -91,15 +99,14 @@
                         tools:text="DeepSeek" />
 
                     <TextView
-                        android:id="@+id/tvRuleHit"
+                        android:id="@+id/tvLowPrice"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
+                        android:maxLines="2"
                         android:textColor="@color/on_brand_secondary"
-                        android:textSize="13sp"
-                        tools:text="命中规则 · 其余时间" />
+                        android:textSize="12sp"
+                        tools:text="下一次 DeepSeek 低价时间 · 2小时" />
                 </LinearLayout>
 
             </LinearLayout>

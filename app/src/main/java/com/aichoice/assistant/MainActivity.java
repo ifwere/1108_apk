@@ -14,13 +14,15 @@ import com.aichoice.assistant.data.Rule;
 import com.aichoice.assistant.data.RuleRepository;
 import com.aichoice.assistant.data.Target;
 import com.aichoice.assistant.databinding.ActivityMainBinding;
-import com.aichoice.assistant.logic.DayKind;
 import com.aichoice.assistant.logic.HolidayCalendar;
 import com.aichoice.assistant.logic.Recommendation;
 import com.aichoice.assistant.logic.RecommendationEngine;
+import com.aichoice.assistant.util.DayLabels;
+import com.aichoice.assistant.util.LowPriceFormatter;
 import com.aichoice.assistant.util.TimeUtils;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private long countdownEndRealtime;
     private long countdownTotalMillis;
     private int lastShownSecond = -1;
+    private List<Rule> activeRules = Collections.emptyList();
+    private Recommendation activeRecommendation;
+    private int lastLowPriceMinute = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
         ZonedDateTime now = ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE);
         List<Rule> rules = repository.getRules();
         Recommendation recommendation = engine.evaluate(now, rules);
-        bindRecommendation(recommendation);
+        activeRules = rules;
+        activeRecommendation = recommendation;
+        bindRecommendation(recommendation, rules, now);
         updateClock(now);
         startCountdown(repository.getCountdownSeconds());
     }
@@ -88,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void bindRecommendation(Recommendation recommendation) {
+    private void bindRecommendation(Recommendation recommendation, List<Rule> rules,
+                                    ZonedDateTime now) {
         Target target = recommendation.getTarget();
         boolean deepSeek = target == Target.DEEPSEEK;
 
@@ -104,18 +112,14 @@ public class MainActivity extends AppCompatActivity {
         int secondaryText = ContextCompat.getColor(this,
                 deepSeek ? R.color.on_brand_secondary : R.color.on_workbuddy_secondary);
         binding.tvSuggestLabel.setTextColor(secondaryText);
-        binding.tvRuleHit.setTextColor(secondaryText);
+        binding.tvClock.setTextColor(secondaryText);
+        binding.tvLowPrice.setTextColor(secondaryText);
         binding.ring.setAccentColor(ContextCompat.getColor(this,
                 deepSeek ? R.color.ring_light_deepseek : R.color.ring_light_workbuddy));
 
-        String ruleName = recommendation.getRuleName();
-        if (ruleName == null || ruleName.trim().isEmpty()) {
-            ruleName = getString(R.string.rule_untitled);
-        }
-        String ruleText = recommendation.isFallback()
-                ? getString(R.string.rule_default_hit)
-                : getString(R.string.rule_hit, ruleName);
-        binding.tvRuleHit.setText(ruleText);
+        binding.tvLowPrice.setText(
+                LowPriceFormatter.describe(this, engine, rules, now, recommendation));
+        lastLowPriceMinute = now.getHour() * 60 + now.getMinute();
 
         // Gentle entrance animation every time the screen is refreshed.
         binding.tvTarget.animate().cancel();
@@ -130,22 +134,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateClock(ZonedDateTime now) {
         ZonedDateTime beijingTime = now.withZoneSameInstant(RecommendationEngine.BEIJING_ZONE);
-        DayKind kind = calendar.classify(beijingTime.toLocalDate());
-        String dayLabel;
-        if (kind == DayKind.HOLIDAY) {
-            String name = calendar.holidayName(beijingTime.toLocalDate());
-            dayLabel = name == null ? getString(R.string.day_holiday) : name;
-        } else if (kind == DayKind.WEEKEND) {
-            dayLabel = calendar.isMakeupWorkday(beijingTime.toLocalDate())
-                    ? getString(R.string.day_makeup_weekend)
-                    : getString(R.string.day_weekend);
-        } else {
-            dayLabel = getString(R.string.day_workday);
-        }
-        binding.tvClock.setText(getString(R.string.main_clock,
+        binding.tvClock.setText(getString(R.string.card_clock,
                 TimeUtils.formatDate(beijingTime),
                 TimeUtils.formatClock(beijingTime),
-                dayLabel));
+                DayLabels.of(this, calendar, beijingTime.toLocalDate())));
+    }
+
+    /** Refreshes the texts that depend on the current minute. */
+    private void refreshLiveText(ZonedDateTime now) {
+        updateClock(now);
+        int minuteOfDay = now.getHour() * 60 + now.getMinute();
+        if (activeRecommendation != null && minuteOfDay != lastLowPriceMinute) {
+            lastLowPriceMinute = minuteOfDay;
+            binding.tvLowPrice.setText(LowPriceFormatter.describe(
+                    this, engine, activeRules, now, activeRecommendation));
+        }
     }
 
     private void startCountdown(int seconds) {
@@ -184,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             binding.tvRemaining.setText(String.valueOf(seconds));
             binding.tvCountdownHint.setText(getString(R.string.main_countdown_hint, seconds));
             pulseRemaining();
-            updateClock(ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE));
+            refreshLiveText(ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE));
         }
         handler.postDelayed(tickRunnable, 50);
     }

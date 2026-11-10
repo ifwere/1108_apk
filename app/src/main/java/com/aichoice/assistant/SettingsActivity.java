@@ -2,6 +2,8 @@ package com.aichoice.assistant;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ import com.aichoice.assistant.logic.HolidayCalendar;
 import com.aichoice.assistant.logic.Recommendation;
 import com.aichoice.assistant.logic.RecommendationEngine;
 import com.aichoice.assistant.ui.RuleAdapter;
+import com.aichoice.assistant.util.DayLabels;
+import com.aichoice.assistant.util.LowPriceFormatter;
 import com.aichoice.assistant.util.TimeUtils;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -54,6 +58,14 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
     private boolean updatingSlider;
     private boolean refreshingHolidays;
     private final ExecutorService refreshExecutor = Executors.newSingleThreadExecutor();
+    private final Handler previewHandler = new Handler(Looper.getMainLooper());
+    private final Runnable previewTick = new Runnable() {
+        @Override
+        public void run() {
+            refreshPreview();
+            previewHandler.postDelayed(this, 30_000L);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +114,15 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
         updateCountdownControls();
         bindHolidayInfo();
         renderCustomHolidays();
+
+        previewHandler.removeCallbacks(previewTick);
+        previewHandler.postDelayed(previewTick, 30_000L);
+    }
+
+    @Override
+    protected void onPause() {
+        previewHandler.removeCallbacks(previewTick);
+        super.onPause();
     }
 
     private void reloadHolidayCalendar() {
@@ -120,24 +141,29 @@ public class SettingsActivity extends AppCompatActivity implements RuleAdapter.L
 
     private void refreshPreview() {
         ZonedDateTime now = ZonedDateTime.now(RecommendationEngine.BEIJING_ZONE);
-        Recommendation recommendation = engine.evaluate(now, repository.getRules());
+        List<Rule> rules = repository.getRules();
+        Recommendation recommendation = engine.evaluate(now, rules);
+        boolean deepSeek = recommendation.getTarget() == Target.DEEPSEEK;
 
+        // Same brand-colored card as the main screen.
+        binding.previewCard.setBackgroundResource(deepSeek
+                ? R.drawable.bg_reco_card
+                : R.drawable.bg_reco_card_workbuddy);
         binding.tvPreviewTarget.setText(recommendation.getTarget().displayName());
         binding.tvPreviewTarget.setTextColor(ContextCompat.getColor(this,
-                recommendation.getTarget() == Target.DEEPSEEK
-                        ? R.color.ring_deepseek
-                        : R.color.ring_workbuddy));
+                deepSeek ? R.color.on_brand : R.color.on_workbuddy));
+        int secondaryText = ContextCompat.getColor(this,
+                deepSeek ? R.color.on_brand_secondary : R.color.on_workbuddy_secondary);
+        binding.tvPreviewLabel.setTextColor(secondaryText);
+        binding.tvPreviewTime.setTextColor(secondaryText);
+        binding.tvPreviewLowPrice.setTextColor(secondaryText);
 
-        String ruleName = recommendation.getRuleName();
-        if (ruleName == null || ruleName.trim().isEmpty()) {
-            ruleName = getString(R.string.rule_untitled);
-        }
-        String ruleText = recommendation.isFallback()
-                ? getString(R.string.settings_preview_default_rule)
-                : getString(R.string.settings_preview_rule, ruleName);
-        binding.tvPreviewRule.setText(ruleText);
-        binding.tvPreviewTime.setText(TimeUtils.formatDate(now)
-                + " " + TimeUtils.formatClock(now));
+        binding.tvPreviewTime.setText(getString(R.string.card_clock,
+                TimeUtils.formatDate(now),
+                TimeUtils.formatClock(now),
+                DayLabels.of(this, calendar, now.toLocalDate())));
+        binding.tvPreviewLowPrice.setText(
+                LowPriceFormatter.describe(this, engine, rules, now, recommendation));
     }
 
     private void setupCountdownSlider() {

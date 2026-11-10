@@ -6,6 +6,7 @@ import com.aichoice.assistant.data.Target;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +21,9 @@ import java.util.List;
 public final class RecommendationEngine {
 
     public static final ZoneId BEIJING_ZONE = ZoneId.of("Asia/Shanghai");
+
+    /** How far ahead the low-price transition search looks, in minutes (60 days). */
+    private static final int MAX_LOOKAHEAD_MINUTES = 60 * 24 * 60;
 
     private final HolidayCalendar calendar;
 
@@ -53,6 +57,41 @@ public final class RecommendationEngine {
 
         // No rule matched: idle time is always DeepSeek.
         return new Recommendation(Target.DEEPSEEK, null, null, true);
+    }
+
+    /**
+     * Returns the next minute boundary strictly after {@code now} at which the
+     * recommendation switches to DeepSeek (the low-price idle window), or
+     * {@code null} if it does not happen within the lookahead window.
+     */
+    public ZonedDateTime nextDeepSeekStart(ZonedDateTime now, List<Rule> rules) {
+        return nextTransition(now, rules, true);
+    }
+
+    /**
+     * Returns the next minute boundary strictly after {@code now} at which the
+     * recommendation leaves DeepSeek, i.e. the end of the current low-price
+     * window, or {@code null} if it never ends within the lookahead window.
+     */
+    public ZonedDateTime nextDeepSeekEnd(ZonedDateTime now, List<Rule> rules) {
+        return nextTransition(now, rules, false);
+    }
+
+    private ZonedDateTime nextTransition(ZonedDateTime now, List<Rule> rules,
+                                         boolean wantDeepSeek) {
+        // Rules are minute-granular, so a change can only happen on a minute
+        // boundary. Start at the next one to skip the current minute.
+        ZonedDateTime cursor = now.withZoneSameInstant(BEIJING_ZONE)
+                .truncatedTo(ChronoUnit.MINUTES)
+                .plusMinutes(1);
+        for (int i = 0; i < MAX_LOOKAHEAD_MINUTES; i++) {
+            boolean isDeepSeek = evaluate(cursor, rules).getTarget() == Target.DEEPSEEK;
+            if (isDeepSeek == wantDeepSeek) {
+                return cursor;
+            }
+            cursor = cursor.plusMinutes(1);
+        }
+        return null;
     }
 
     static boolean matchesTime(Rule rule, int minuteOfDay) {

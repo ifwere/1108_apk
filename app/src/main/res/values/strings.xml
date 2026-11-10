@@ -6,9 +6,20 @@
 
     <!-- Main screen -->
     <string name="main_clock">北京时间 · %1$s %2$s · %3$s</string>
+    <string name="card_clock">%1$s %2$s · %3$s</string>
     <string name="main_suggest_label">此刻建议使用</string>
     <string name="rule_hit">命中规则 · %1$s</string>
     <string name="rule_default_hit">默认闲时策略 · 无规则命中</string>
+    <string name="low_price_next">下一次 DeepSeek 低价时间 · %1$s</string>
+    <string name="low_price_current">当前低价剩余 · %1$s</string>
+    <string name="low_price_persistent">持续</string>
+    <string name="low_price_unavailable">暂无</string>
+    <string name="duration_days">%1$d天</string>
+    <string name="duration_days_hours">%1$d天%2$d小时</string>
+    <string name="duration_days_hours_minutes">%1$d天%2$d小时%3$d分</string>
+    <string name="duration_hours">%1$d小时</string>
+    <string name="duration_hours_minutes">%1$d小时%2$d分</string>
+    <string name="duration_minutes">%1$d分</string>
     <string name="main_countdown_hint">%1$d 秒后自动退出应用</string>
     <string name="main_countdown_exiting">正在退出…</string>
     <string name="main_seconds_unit">秒</string>
